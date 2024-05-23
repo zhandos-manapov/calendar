@@ -1,5 +1,5 @@
 <div class="dialog-title" mat-dialog-title>
-  <div>Create an Event</div>
+  <div>{{ data.edit ? "Edit Event" : "Create Event" }}</div>
   <div>
     @if (this.data.edit) {
     <mat-slide-toggle
