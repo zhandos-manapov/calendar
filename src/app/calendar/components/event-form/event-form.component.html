@@ -1,0 +1,94 @@
+<div class="dialog-title" mat-dialog-title>
+  <div>Create an Event</div>
+  <div>
+    @if (this.data.edit) {
+    <mat-slide-toggle
+      color="primary"
+      [(ngModel)]="startEdit"
+      [ngModelOptions]="{ standalone: true }"
+      >Edit</mat-slide-toggle
+    >}
+  </div>
+</div>
+<mat-dialog-content>
+  <div class="form-container">
+    <form #eventForm="ngForm" (ngSubmit)="onSubmit(eventForm)" id="eventForm">
+      <div class="control">
+        <mat-form-field appearance="outline">
+          <mat-label>Add title</mat-label>
+          <input
+            type="text"
+            matInput
+            [(ngModel)]="eventFormValue.title"
+            name="title"
+            required
+            [disabled]="!startEdit"
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="control">
+        <mat-form-field appearance="outline">
+          <mat-label>Day</mat-label>
+          <input
+            type="date"
+            matInput
+            placeholder="start date"
+            [(ngModel)]="eventFormValue.date"
+            name="date"
+            required
+            [disabled]="!startEdit"
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="control">
+        <mat-form-field appearance="outline">
+          <mat-label>Start Time</mat-label>
+          <input
+            type="time"
+            matInput
+            placeholder="start date"
+            [(ngModel)]="eventFormValue.startTime"
+            name="startTime"
+            required
+            [disabled]="!startEdit"
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="control">
+        <mat-form-field appearance="outline">
+          <mat-label>End Time</mat-label>
+          <input
+            type="time"
+            matInput
+            placeholder="start date"
+            [(ngModel)]="eventFormValue.endTime"
+            name="endTime"
+            required
+            [disabled]="!startEdit"
+          />
+        </mat-form-field>
+      </div>
+    </form>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button
+    mat-raised-button
+    type="submit"
+    color="primary"
+    [disabled]="eventForm.invalid"
+    form="eventForm"
+  >
+    Save
+  </button>
+  <button mat-button mat-dialog-close color="primary">Cancel</button>
+
+  @if(data.edit){
+  <button mat-button mat-dialog-close color="warn" (click)="onDelete()">
+    Delete Event
+  </button>
+  }
+</mat-dialog-actions>

@@ -1,0 +1,91 @@
+.calendar-container {
+  padding: 1rem 10%;
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+
+  > .column:nth-child(1) {
+    flex: 0 0 50%;
+
+    .calendar {
+      > .calendar-headline {
+        display: flex;
+        justify-content: space-between;
+        > .calendar-headline-month {
+          font-size: 2rem;
+          font-weight: bold;
+          display: flex;
+          align-items: center;
+        }
+        > .calendar-headline-controls {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+      }
+
+      > .calendar-weeks-grid {
+        display: flex;
+        .calendar-weeks-grid-item {
+          flex: 1;
+        }
+      }
+
+      > .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        grid-gap: 0;
+
+        > .calendar-grid-item {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+
+          > .event-dots {
+            height: min-content;
+            display: flex;
+            gap: 3px;
+          }
+
+          --grid-border-color: #ddd;
+
+          padding: 0.5rem;
+          height: 60px;
+          border-top: 1px solid var(--grid-border-color);
+          border-left: 1px solid var(--grid-border-color);
+
+          &:nth-child(7n) {
+            border-right: 1px solid var(--grid-border-color);
+          }
+
+          &:nth-last-child(-n + 7) {
+            border-bottom: 1px solid var(--grid-border-color);
+          }
+          &:hover {
+            background-color: #ddd;
+          }
+        }
+      }
+    }
+  }
+
+  > .column:nth-child(2) {
+    flex: 0 0 50%;
+    > mat-card {
+      height: 100%;
+    }
+  }
+}
+
+.active {
+  background-color: #ddd;
+}
+
+.inactive {
+  color: lightgray;
+}
+
+.today {
+  color: green;
+  font-size: 20px;
+}

@@ -1,0 +1,18 @@
+.form-container {
+  padding-top: 5px;
+  width: 20vw;
+  background-color: white;
+  > form {
+    > .control {
+      > mat-form-field {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.dialog-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

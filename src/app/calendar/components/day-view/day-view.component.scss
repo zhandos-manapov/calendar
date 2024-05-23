@@ -1,0 +1,79 @@
+.day-view-container {
+  --border-color: #ddd;
+
+  > .header-row {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background-color: white;
+    > div:first-child {
+      > span {
+        position: absolute;
+        bottom: 0;
+        font-size: 14px;
+      }
+    }
+    > div:nth-child(2) {
+      > span {
+        position: absolute;
+        bottom: 3px;
+        font-size: 20px;
+        font-weight: 300;
+        padding-left: 5px;
+      }
+    }
+  }
+
+  .row {
+    display: flex;
+    height: 2rem;
+
+    > div:nth-child(1) {
+      width: 80px;
+      > .time {
+        text-align: right;
+        padding-right: 0.5rem;
+        font-size: 12px;
+        font-weight: 300;
+        margin-top: -10px;
+        margin-left: 5px;
+      }
+    }
+
+    > div:nth-child(2) {
+      flex: 1;
+      border-bottom: 1px solid var(--border-color);
+      border-left: 1px solid var(--border-color);
+    }
+  }
+}
+
+.parent {
+  position: relative;
+}
+
+.event {
+  position: absolute;
+  right: 16px;
+  background-color: green;
+  color: white;
+  border-radius: 4px;
+  border: 1px solid white;
+  > div {
+    font-size: 8px;
+    line-height: normal;
+    margin-top: -5px;
+    font-weight: 300;
+    padding-left: 5px;
+  }
+  > span {
+    display: inline-block;
+    font-size: 11px;
+    position: absolute;
+  }
+}
+
+.event:active {
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
