@@ -10,7 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -31,6 +31,7 @@ const routes: Routes = [
   declarations: [CalendarMainComponent, DayViewComponent, EventFormComponent],
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     MatRippleModule,
     MatDialogModule,
     DragDropModule,
@@ -38,7 +39,6 @@ const routes: Routes = [
     MatIconModule,
     MatButtonModule,
     MatDatepickerModule,
-    FormsModule,
     MatInputModule,
     MatFormFieldModule,
     MatSlideToggleModule,

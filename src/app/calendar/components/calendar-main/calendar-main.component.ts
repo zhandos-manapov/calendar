@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, Signal, signal } from '@angular/core';
 import { CalendarService } from '../../../services/calendar.service';
-import { BehaviorSubject, switchMap } from 'rxjs';
+import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 import { EventDbService } from '../../../services/event-db.service';
 import { EventDB } from '../../../db/eventDB';
 import { ActivatedRoute, Route, Router } from '@angular/router';
@@ -23,6 +23,7 @@ export class CalendarMainComponent implements OnInit, OnDestroy {
   weekdays = signal([] as string[]);
   daysOfTheMonth = signal([] as Date[]);
   allEvents = signal({} as EventDB);
+  sub1$!: Subscription;
 
   constructor(
     private readonly calendarService: CalendarService,
@@ -55,7 +56,7 @@ export class CalendarMainComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.firstDayOfActiveMonth.subscribe((firstDay) => {
+    this.sub1$ = this.firstDayOfActiveMonth.subscribe((firstDay) => {
       this.daysOfTheMonth.set(this.calendarService.getDaysOfTheMonth(firstDay));
     });
 
@@ -65,7 +66,7 @@ export class CalendarMainComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.firstDayOfActiveMonth.unsubscribe();
+    this.sub1$.unsubscribe();
   }
 
   getMonthName(index: number) {

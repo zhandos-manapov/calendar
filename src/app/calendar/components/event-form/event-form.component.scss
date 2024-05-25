@@ -3,6 +3,10 @@
   width: 20vw;
   background-color: white;
   > form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
     > .control {
       > mat-form-field {
         width: 100%;

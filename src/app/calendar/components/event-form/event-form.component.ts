@@ -1,85 +1,116 @@
-import { Component, Inject } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { CalendarEvent } from '../../../db/eventDB';
-import { CalendarService } from '../../../services/calendar.service';
 import { EventFormDialogData } from '../day-view/day-view.component';
 import { EventDbService } from '../../../services/event-db.service';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'app-event-form',
   templateUrl: './event-form.component.html',
   styleUrl: './event-form.component.scss',
 })
-export class EventFormComponent {
-  startEdit = false;
-
-  eventFormValue = {
-    title: '',
-    date: '',
-    startTime: '',
-    endTime: '',
-  };
+export class EventFormComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject();
+  readonly startEdit = new BehaviorSubject(false);
+  editMode = false;
+  eventForm: FormGroup;
 
   constructor(
     private readonly dialogRef: MatDialogRef<EventFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: EventFormDialogData,
-    private readonly calendarService: CalendarService,
+    @Inject(MAT_DIALOG_DATA) private readonly data: EventFormDialogData,
     private readonly snackBar: MatSnackBar,
-    private readonly eventDbService: EventDbService
+    private readonly eventDbService: EventDbService,
+    private readonly fb: FormBuilder
   ) {
-    if (!data.edit) {
-      this.startEdit = true;
-      this.eventFormValue.date = this.formatDate(data.hour);
-      const end = new Date(data.hour);
-      end.setHours(end.getHours() + 1);
-      this.eventFormValue.startTime = this.formatTime(data.hour);
-      this.eventFormValue.endTime = this.formatTime(end);
-    } else {
+    this.editMode = data.edit;
+
+    let title = '',
+      date = '',
+      startTime = '',
+      endTime = '';
+
+    if (data.edit) {
       const event = data.event;
-      this.eventFormValue.date = this.formatDate(event.startDate);
-      this.eventFormValue.startTime = this.formatTime(event.startDate);
-      this.eventFormValue.endTime = this.formatTime(event.endDate);
-      this.eventFormValue.title = event.title;
+      title = event.title;
+      date = this.formatDate(event.startDate);
+      startTime = this.formatTime(event.startDate);
+      endTime = this.formatTime(event.endDate);
+    } else {
+      this.startEdit.next(true);
+      date = this.formatDate(data.hourSlot);
+      startTime = this.formatTime(data.hourSlot);
+
+      const end = new Date(data.hourSlot);
+      end.setHours(end.getHours() + 1);
+      endTime = this.formatTime(end);
     }
+
+    this.eventForm = this.fb.group({
+      title: [title, [Validators.required, this.noWhiteSpaceValidator]],
+      date: [date, [Validators.required]],
+      startTime: [startTime, [Validators.required, this.startTimeValidator]],
+      endTime: [endTime, [Validators.required, this.endTimeValidator]],
+    });
   }
 
-  onSubmit(eventForm: NgForm) {
-    if (eventForm.invalid) return;
+  ngOnInit(): void {
+    this.startEdit.pipe(takeUntil(this.destroy$)).subscribe((startEdit) => {
+      if (startEdit) {
+        this.eventForm.enable();
+      } else {
+        this.eventForm.disable();
+      }
+    });
 
-    const startDate = new Date(this.eventFormValue.date);
-    const endDate = new Date(this.eventFormValue.date);
-    const [sh, sm] = this.eventFormValue.startTime.split(':');
-    const [eh, em] = this.eventFormValue.endTime.split(':');
+    this.eventForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        // testing
+        console.log(value);
+      });
+  }
 
-    startDate.setHours(+sh);
-    startDate.setMinutes(+sm);
-    endDate.setHours(+eh);
-    endDate.setMinutes(+em);
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.complete();
+  }
 
-    if (startDate.getTime() >= endDate.getTime()) {
-      this.snackBar.open(
-        'The end time cannot be earlier than the start time',
-        undefined,
-        { duration: 1000 }
-      );
-      return;
-    }
+  onSubmit() {
+    if (this.eventForm.invalid) return;
 
-    const event = {
-      title: this.eventFormValue.title,
+    const { title, date, startTime, endTime } = this.eventForm.value;
+
+    const startDate = new Date(date);
+    const endDate = new Date(date);
+    const [sh, sm] = startTime.split(':');
+    const [eh, em] = endTime.split(':');
+
+    startDate.setHours(+sh, +sm);
+    endDate.setHours(+eh, +em);
+
+    const payloadEvent = {
+      title: title.trim(),
       startDate,
       endDate,
     } as CalendarEvent;
 
     let obs;
-    if (!this.data.edit) {
-      obs = this.eventDbService.createEvent(event);
+    if (this.data.edit) {
+      payloadEvent.id = this.data.event.id;
+      obs = this.eventDbService.updateEvent(payloadEvent);
     } else {
-      event.id = this.data.event.id;
-      obs = this.eventDbService.updateEvent(event);
+      obs = this.eventDbService.createEvent(payloadEvent);
     }
     obs.subscribe(() => {
       this.snackBar.open('Event saved successfully', undefined, {
@@ -115,5 +146,72 @@ export class EventFormComponent {
         });
         this.dialogRef.close(true);
       });
+  }
+
+  noWhiteSpaceValidator(
+    control: AbstractControl<any, any>
+  ): ValidationErrors | null {
+    if (!control.value || control.value.trim() === '')
+      return { required: true };
+    return null;
+  }
+
+  startTimeValidator(
+    control: AbstractControl<any, any>
+  ): ValidationErrors | null {
+    if (!control || !control.value) return null;
+
+    const root = control.root;
+    const endTimeControl = root.get('endTime');
+    if (!root || !endTimeControl || !endTimeControl.value) return null;
+
+    const offset = new Date();
+    offset.setHours(0, 0, 0, 0);
+
+    const startDate = new Date(offset);
+    const endDate = new Date(offset);
+    const [sh, sm] = control.value.split(':');
+    const [eh, em] = endTimeControl?.value.split(':');
+
+    startDate.setHours(+sh, +sm);
+    endDate.setHours(+eh, +em);
+
+    if (startDate.getTime() >= endDate.getTime()) {
+      return { startTimeValidator: true };
+    }
+
+    endTimeControl.setErrors(null);
+    return null;
+  }
+
+  endTimeValidator(
+    control: AbstractControl<any, any>
+  ): ValidationErrors | null {
+    if (!control || !control.value) return null;
+
+    const root = control.root;
+    const startTimeControl = root.get('startTime');
+    if (!root || !startTimeControl || !startTimeControl.value) return null;
+
+    const offset = new Date();
+    offset.setHours(0, 0, 0, 0);
+
+    const startDate = new Date(offset);
+    const endDate = new Date(offset);
+    const [sh, sm] = startTimeControl.value.split(':');
+    const [eh, em] = control?.value.split(':');
+
+    startDate.setHours(+sh, +sm);
+    endDate.setHours(+eh, +em);
+
+    if (startDate.getTime() >= endDate.getTime()) {
+      return { endTimeValidator: true };
+    }
+    startTimeControl.setErrors(null);
+    return null;
+  }
+
+  toggleEdit(event: MatSlideToggleChange) {
+    this.startEdit.next(event.checked);
   }
 }

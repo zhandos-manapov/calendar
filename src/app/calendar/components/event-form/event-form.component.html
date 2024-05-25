@@ -1,29 +1,27 @@
 <div class="dialog-title" mat-dialog-title>
-  <div>{{ data.edit ? "Edit Event" : "Create Event" }}</div>
+  <div>{{ editMode ? "Edit Event" : "Create Event" }}</div>
   <div>
-    @if (this.data.edit) {
-    <mat-slide-toggle
-      color="primary"
-      [(ngModel)]="startEdit"
-      [ngModelOptions]="{ standalone: true }"
+    @if (editMode) {
+    <mat-slide-toggle color="primary" (change)="toggleEdit($event)"
       >Edit</mat-slide-toggle
     >}
   </div>
 </div>
 <mat-dialog-content>
   <div class="form-container">
-    <form #eventForm="ngForm" (ngSubmit)="onSubmit(eventForm)" id="eventForm">
+    <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" id="eventForm">
       <div class="control">
         <mat-form-field appearance="outline">
           <mat-label>Add title</mat-label>
-          <input
-            type="text"
-            matInput
-            [(ngModel)]="eventFormValue.title"
-            name="title"
-            required
-            [disabled]="!startEdit"
-          />
+          <input type="text" matInput formControlName="title" />
+          @if(eventForm.get('title')?.invalid && (eventForm.get('title')?.dirty
+          || eventForm.get('title')?.touched)){
+          <mat-error>
+            @if(eventForm.get('title')?.errors?.['required']){
+            <span>This field is required</span>
+            }
+          </mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -33,12 +31,17 @@
           <input
             type="date"
             matInput
-            placeholder="start date"
-            [(ngModel)]="eventFormValue.date"
-            name="date"
-            required
-            [disabled]="!startEdit"
+            placeholder="Day"
+            formControlName="date"
           />
+          @if(eventForm.get('date')?.invalid && (eventForm.get('date')?.dirty ||
+          eventForm.get('date')?.touched)){
+          <mat-error>
+            @if(eventForm.get('date')?.errors?.['required']){
+            <span>This field is required</span>
+            }
+          </mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -48,12 +51,20 @@
           <input
             type="time"
             matInput
-            placeholder="start date"
-            [(ngModel)]="eventFormValue.startTime"
-            name="startTime"
-            required
-            [disabled]="!startEdit"
+            placeholder="start time"
+            formControlName="startTime"
           />
+          @if(eventForm.get('startTime')?.invalid &&
+          (eventForm.get('startTime')?.dirty ||
+          eventForm.get('startTime')?.touched)){
+          <mat-error>
+            @if(eventForm.get('startTime')?.errors?.['required']){
+            <span>This field is required</span>
+            } @if(eventForm.get('startTime')?.errors?.['startTimeValidator']){
+            <span>The start time cannot be later than the end time</span>
+            }
+          </mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -63,12 +74,20 @@
           <input
             type="time"
             matInput
-            placeholder="start date"
-            [(ngModel)]="eventFormValue.endTime"
-            name="endTime"
-            required
-            [disabled]="!startEdit"
+            placeholder="start time"
+            formControlName="endTime"
           />
+          @if(eventForm.get('endTime')?.invalid &&
+          (eventForm.get('endTime')?.dirty ||
+          eventForm.get('endTime')?.touched)){
+          <mat-error>
+            @if(eventForm.get('endTime')?.errors?.['required']){
+            <span>This field is required</span>
+            } @if(eventForm.get('endTime')?.errors?.['endTimeValidator']){
+            <span>The end time cannot be earlier than the start time</span>
+            }
+          </mat-error>
+          }
         </mat-form-field>
       </div>
     </form>
@@ -86,8 +105,14 @@
   </button>
   <button mat-button mat-dialog-close color="primary">Cancel</button>
 
-  @if(data.edit){
-  <button mat-button mat-dialog-close color="warn" (click)="onDelete()">
+  @if(editMode){
+  <button
+    type="button"
+    mat-button
+    mat-dialog-close
+    color="warn"
+    (click)="onDelete()"
+  >
     Delete Event
   </button>
   }

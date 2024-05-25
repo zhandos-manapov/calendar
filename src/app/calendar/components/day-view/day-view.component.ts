@@ -14,13 +14,18 @@ import { CalendarService } from '../../../services/calendar.service';
 import { EventFormComponent } from '../event-form/event-form.component';
 import { EventDbService } from '../../../services/event-db.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
 
-export interface EventFormDialogData {
-  hour: Date;
-  edit: boolean;
+export type EventFormDialogData = EditEventFromData | CreateEventFormData;
+
+type EditEventFromData = {
+  edit: true;
   event: CalendarEvent;
-}
+};
+
+type CreateEventFormData = {
+  edit: false;
+  hourSlot: Date;
+};
 
 @Component({
   selector: 'app-day-view',
@@ -207,7 +212,7 @@ export class DayViewComponent implements OnInit {
 
   openDialog(hour: Date) {
     const dialogRef = this.matDialog.open(EventFormComponent, {
-      data: { hour, edit: false } as EventFormDialogData,
+      data: { hourSlot: hour, edit: false } as CreateEventFormData,
     });
     dialogRef
       .afterClosed()
@@ -231,7 +236,7 @@ export class DayViewComponent implements OnInit {
 
   onEdit(event: CalendarEvent) {
     const dialogRef = this.matDialog.open(EventFormComponent, {
-      data: { event, edit: true } as EventFormDialogData,
+      data: { event, edit: true } as EditEventFromData,
     });
     dialogRef
       .afterClosed()

@@ -9,7 +9,6 @@ const routes: Routes = [
   },
   {
     path: 'calendar',
-
     // Lazily loads the calendar module
     loadChildren: () =>
       import('./calendar/calendar.module').then((m) => m.CalendarModule),
