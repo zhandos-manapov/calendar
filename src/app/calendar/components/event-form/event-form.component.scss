@@ -1,6 +1,7 @@
 .form-container {
   padding-top: 5px;
-  width: 20vw;
+  width: 25vw;
+  min-width: 450px;
   background-color: white;
   > form {
     display: flex;
