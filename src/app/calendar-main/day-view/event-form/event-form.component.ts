@@ -29,7 +29,7 @@ import { EventFormDialogData } from '../day-view.component'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventFormComponent implements OnInit, OnDestroy {
-  private readonly destroy$ = new Subject()
+  private readonly destroy$ = new Subject<void>()
   private readonly startEdit = new BehaviorSubject(false)
 
   private readonly formAbility$ = this.startEdit.pipe(
@@ -86,7 +86,7 @@ export class EventFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next(true)
+    this.destroy$.next()
     this.destroy$.complete()
   }
 
